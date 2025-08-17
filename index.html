@@ -5,55 +5,107 @@
   <title>Sheikh Database</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
+    /* Background Gradient */
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
     }
+
+    /* Card Styling */
     .card {
       background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      width: 400px;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      width: 420px;
       max-width: 95%;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
     }
-    input, button {
+
+    h2 {
+      margin-bottom: 15px;
+      color: #2d89ef;
+    }
+
+    input {
       width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 16px;
+      transition: 0.3s;
     }
+    input:focus {
+      border-color: #2d89ef;
+      outline: none;
+      box-shadow: 0 0 5px rgba(45,137,239,0.5);
+    }
+
     button {
-      background: #2d89ef;
-      color: white;
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      border-radius: 8px;
       border: none;
+      font-size: 16px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #2d89ef, #1b5cb8);
+      color: white;
       cursor: pointer;
+      transition: 0.3s;
     }
     button:hover {
-      background: #1b5cb8;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
     }
+
     pre {
-      background: #f4f4f4;
-      padding: 10px;
-      border-radius: 6px;
-      margin-top: 15px;
+      background: #f9f9f9;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 18px;
       font-size: 14px;
-      overflow-x: auto;
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .endpoint {
+      margin-top: 20px;
+      font-size: 13px;
+      background: #eef6ff;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: left;
+      border: 1px solid #cfe2ff;
+      color: #1b5cb8;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>Sheikh Database Lookup</h2>
+    <h2>🔎 Sheikh Database Lookup</h2>
     <input type="text" id="input" placeholder="Enter Mobile or CNIC">
     <button onclick="lookup()">Search</button>
     <pre id="result">Result will show here...</pre>
+
+    <!-- API Endpoint Info -->
+    <div class="endpoint">
+      <strong>API Endpoint:</strong><br>
+      GET https://shadowdatabase.site/api.php?token={0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad}&num={mobile_number_or_cnic}
+    </div>
   </div>
 
   <script>
@@ -62,19 +114,19 @@
       const resultBox = document.getElementById("result");
 
       if (!num) {
-        alert("Please enter a number or CNIC!");
+        alert("⚠️ Please enter a number or CNIC!");
         return;
       }
 
-      resultBox.textContent = "Fetching data...";
+      resultBox.textContent = "⏳ Fetching data...";
 
       try {
-        const token = "0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad"; //
+        const token = "0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad"; // 👈 apna token yahan lagana
         const res = await fetch(`https://shadowdatabase.site/api.php?token=${0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad}&num=${num}`);
         const data = await res.json();
         resultBox.textContent = JSON.stringify(data, null, 2);
       } catch (err) {
-        resultBox.textContent = "Error fetching data!";
+        resultBox.textContent = "❌ Error fetching data!";
         console.error(err);
       }
     }

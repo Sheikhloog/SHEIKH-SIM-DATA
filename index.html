@@ -101,14 +101,7 @@
     <button onclick="lookup()">Search</button>
     <pre id="result">Result will show here...</pre>
 
-    <!-- API Endpoint Info -->
-    <div class="endpoint">
-      <strong>API Endpoint:</strong><br>
-      GET https://shadowdatabase.site/api.php?token={0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad}&num={mobile_number_or_cnic}
-    </div>
-  </div>
-
-  <script>
+     <script>
     async function lookup() {
       const num = document.getElementById("input").value.trim();
       const resultBox = document.getElementById("result");
@@ -122,7 +115,7 @@
 
       try {
         const token = "0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad"; // 👈 apna token yahan lagana
-        const res = await fetch(`https://shadowdatabase.site/api.php?token=${0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad}&num=${num}`);
+        const res = await fetch(`api.php?token=${token}&num=${num}`);
         const data = await res.json();
         resultBox.textContent = JSON.stringify(data, null, 2);
       } catch (err) {

@@ -2,7 +2,7 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
-// Token aur number frontend se lene
+// Input parameters
 $token = $_GET['token'] ?? '';
 $num   = $_GET['num'] ?? '';
 
@@ -11,12 +11,20 @@ if (!$token || !$num) {
     exit;
 }
 
-// API request forward karna
+// API URL
 $url = "https://shadowdatabase.site/api.php?token=$token&num=$num";
-$response = file_get_contents($url);
 
-if ($response === FALSE) {
-    echo json_encode(["error" => "Unable to fetch data"]);
+// cURL setup
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+$response = curl_exec($ch);
+
+if (curl_errno($ch)) {
+    echo json_encode(["error" => "Curl error: " . curl_error($ch)]);
 } else {
     echo $response;
 }
+curl_close($ch);

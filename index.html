@@ -1,0 +1,20 @@
+GET https://shadowdatabase.site/api.php?token={0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad}&num={mobile_number_or_cnic}
+Mobile Lookup:
+curl "https://shadowdatabase.site/api.php?token=0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad&num=put number here"
+
+CNIC Lookup:
+curl "https://shadowdatabase.site/api.php?token=0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad&num=put cnic"
+{
+    "status": "success",
+    "message": "Data retrieved successfully",
+    "data": [
+        {
+            "Mobile #": "REDACTED",
+            "Name": "REDACTED",
+            "CNIC": "REDACTED",
+            "Address": "REDACTED",
+            "Operator": "REDACTED"
+        }
+    ],
+    "developer": "Sheikh Innovations"
+}

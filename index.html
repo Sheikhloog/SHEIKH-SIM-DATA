@@ -1,20 +1,91 @@
-GET https://shadowdatabase.site/api.php?token={0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad}&num={mobile_number_or_cnic}
-Mobile Lookup:
-curl "https://shadowdatabase.site/api.php?token=0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad&num=put number here"
+// pages/index.tsx
+import { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
-CNIC Lookup:
-curl "https://shadowdatabase.site/api.php?token=0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad&num=put cnic"
-{
-    "status": "success",
-    "message": "Data retrieved successfully",
-    "data": [
-        {
-            "Mobile #": "REDACTED",
-            "Name": "REDACTED",
-            "CNIC": "REDACTED",
-            "Address": "REDACTED",
-            "Operator": "REDACTED"
-        }
-    ],
-    "developer": "Sheikh Innovations"
+const ENDPOINTS = [
+  { key: "users", label: "Users by ID", url: (id: string) => `https://jsonplaceholder.typicode.com/users/${id}` },
+  { key: "posts", label: "Posts by ID", url: (id: string) => `https://jsonplaceholder.typicode.com/posts/${id}` },
+  { key: "todos", label: "Todos by ID", url: (id: string) => `https://jsonplaceholder.typicode.com/todos/${id}` },
+] as const;
+
+type EndpointKey = typeof ENDPOINTS[number]["key"];
+
+export default function Home() {
+  const [endpoint, setEndpoint] = useState<EndpointKey>("users");
+  const [id, setId] = useState("");
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const controllerRef = useRef<AbortController | null>(null);
+
+  const selected = useMemo(() => ENDPOINTS.find(e => e.key === endpoint)!, [endpoint]);
+
+  useEffect(() => () => controllerRef.current?.abort(), []);
+
+  async function fetchData(e: React.FormEvent) {
+    e.preventDefault();
+    const numeric = Number(id);
+    if (!id || Number.isNaN(numeric) || numeric < 1 || numeric > 10) {
+      setError("Enter an ID between 1 and 10 (demo dataset)");
+      setData(null);
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    const url = selected.url(id.trim());
+    controllerRef.current?.abort();
+    controllerRef.current = new AbortController();
+    try {
+      const res = await fetch(url, { signal: controllerRef.current.signal });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const json = await res.json();
+      setData(json);
+    } catch (err: any) {
+      setError(err.message || "Request failed");
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-start p-8 font-sans">
+      <motion.h1 initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-3xl font-bold mb-4">
+        Safe API Demo
+      </motion.h1>
+
+      <form onSubmit={fetchData} className="flex flex-col gap-3 w-full max-w-md">
+        <label className="text-sm font-medium">Choose Endpoint</label>
+        <select value={endpoint} onChange={e => setEndpoint(e.target.value as EndpointKey)} className="border rounded p-2">
+          {ENDPOINTS.map(e => (
+            <option key={e.key} value={e.key}>{e.label}</option>
+          ))}
+        </select>
+
+        <label className="text-sm font-medium">Enter ID (1–10)</label>
+        <input
+          value={id}
+          onChange={e => setId(e.target.value.replace(/[^0-9]/g, ""))}
+          className="border rounded p-2"
+          placeholder="e.g. 3"
+        />
+
+        <button type="submit" disabled={loading} className="bg-blue-600 text-white rounded p-2 hover:bg-blue-700">
+          {loading ? "Fetching…" : "Fetch Data"}
+        </button>
+      </form>
+
+      {error && <div className="mt-4 text-red-600">{error}</div>}
+
+      {data && (
+        <pre className="mt-4 text-sm bg-gray-100 rounded p-4 w-full max-w-md overflow-x-auto whitespace-pre-wrap">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      )}
+
+      <p className="text-xs text-gray-500 mt-8">
+        Demo uses JSONPlaceholder (public fake API). Safe for learning.
+      </p>
+    </div>
+  );
 }

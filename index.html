@@ -5,7 +5,6 @@
   <title>Sheikh Database</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    /* Background Gradient */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #4facfe, #00f2fe);
@@ -15,24 +14,17 @@
       height: 100vh;
       margin: 0;
     }
-
-    /* Card Styling */
     .card {
       background: white;
       padding: 25px;
       border-radius: 16px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-      width: 420px;
+      width: 450px;
       max-width: 95%;
       text-align: center;
       animation: fadeIn 1s ease-in-out;
     }
-
-    h2 {
-      margin-bottom: 15px;
-      color: #2d89ef;
-    }
-
+    h2 { color: #2d89ef; }
     input {
       width: 100%;
       padding: 12px;
@@ -47,7 +39,6 @@
       outline: none;
       box-shadow: 0 0 5px rgba(45,137,239,0.5);
     }
-
     button {
       width: 100%;
       padding: 12px;
@@ -65,18 +56,21 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 15px rgba(0,0,0,0.2);
     }
-
-    pre {
-      background: #f9f9f9;
-      padding: 12px;
-      border-radius: 8px;
+    table {
+      width: 100%;
+      border-collapse: collapse;
       margin-top: 18px;
-      font-size: 14px;
-      text-align: left;
-      max-height: 200px;
-      overflow-y: auto;
     }
-
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background: #2d89ef;
+      color: white;
+    }
     .endpoint {
       margin-top: 20px;
       font-size: 13px;
@@ -87,7 +81,6 @@
       border: 1px solid #cfe2ff;
       color: #1b5cb8;
     }
-
     @keyframes fadeIn {
       from {opacity: 0; transform: translateY(20px);}
       to {opacity: 1; transform: translateY(0);}
@@ -97,29 +90,53 @@
 <body>
   <div class="card">
     <h2>🔎 Sheikh Database Lookup</h2>
-    <input type="text" id="input" placeholder="Enter Mobile or CNIC">
+    <input type="text" id="input" placeholder="Enter Mobile (e.g. +923001234567)">
     <button onclick="lookup()">Search</button>
-    <pre id="result">Result will show here...</pre>
+    <div id="result">Result will show here...</div>
 
-     <script>
+    <div class="endpoint">
+      <strong>API Endpoint:</strong><br>
+      GET https://apilayer.net/api/validate?access_key=YOUR_API_KEY&number={mobile_number}
+    </div>
+  </div>
+
+  <script>
     async function lookup() {
       const num = document.getElementById("input").value.trim();
       const resultBox = document.getElementById("result");
 
       if (!num) {
-        alert("⚠️ Please enter a number or CNIC!");
+        alert("⚠️ Please enter a phone number with country code!");
         return;
       }
 
-      resultBox.textContent = "⏳ Fetching data...";
+      resultBox.innerHTML = "⏳ Fetching data...";
 
       try {
-        const token = "0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad"; // 👈 apna token yahan lagana
-        const res = await fetch(`api.php?token=${token}&num=${num}`);
+        const token = "5aa666c7d166647c2f03946d3c51d1a5"; // 👈 API key
+        const url = `https://apilayer.net/api/validate?access_key=${token}&number=${encodeURIComponent(num)}`;
+
+        const res = await fetch(url);
         const data = await res.json();
-        resultBox.textContent = JSON.stringify(data, null, 2);
+
+        if (!data.valid) {
+          resultBox.innerHTML = "<b>❌ Invalid Number!</b>";
+          return;
+        }
+
+        resultBox.innerHTML = `
+          <table>
+            <tr><th>Field</th><th>Value</th></tr>
+            <tr><td><b>International</b></td><td>${data.international_format || "-"}</td></tr>
+            <tr><td><b>Local</b></td><td>${data.local_format || "-"}</td></tr>
+            <tr><td><b>Country</b></td><td>${data.country_name || "-"} (${data.country_code || "-"})</td></tr>
+            <tr><td><b>Location</b></td><td>${data.location || "-"}</td></tr>
+            <tr><td><b>Carrier</b></td><td>${data.carrier || "-"}</td></tr>
+            <tr><td><b>Line Type</b></td><td>${data.line_type || "-"}</td></tr>
+          </table>
+        `;
       } catch (err) {
-        resultBox.textContent = "❌ Error fetching data!";
+        resultBox.innerHTML = "❌ Error fetching data!";
         console.error(err);
       }
     }

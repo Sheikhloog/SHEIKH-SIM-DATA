@@ -1,91 +1,83 @@
-// pages/index.tsx
-import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
-
-const ENDPOINTS = [
-  { key: "users", label: "Users by ID", url: (id: string) => `https://jsonplaceholder.typicode.com/users/${id}` },
-  { key: "posts", label: "Posts by ID", url: (id: string) => `https://jsonplaceholder.typicode.com/posts/${id}` },
-  { key: "todos", label: "Todos by ID", url: (id: string) => `https://jsonplaceholder.typicode.com/todos/${id}` },
-] as const;
-
-type EndpointKey = typeof ENDPOINTS[number]["key"];
-
-export default function Home() {
-  const [endpoint, setEndpoint] = useState<EndpointKey>("users");
-  const [id, setId] = useState("");
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const controllerRef = useRef<AbortController | null>(null);
-
-  const selected = useMemo(() => ENDPOINTS.find(e => e.key === endpoint)!, [endpoint]);
-
-  useEffect(() => () => controllerRef.current?.abort(), []);
-
-  async function fetchData(e: React.FormEvent) {
-    e.preventDefault();
-    const numeric = Number(id);
-    if (!id || Number.isNaN(numeric) || numeric < 1 || numeric > 10) {
-      setError("Enter an ID between 1 and 10 (demo dataset)");
-      setData(null);
-      return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sheikh Database</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    setError(null);
-    setLoading(true);
-    const url = selected.url(id.trim());
-    controllerRef.current?.abort();
-    controllerRef.current = new AbortController();
-    try {
-      const res = await fetch(url, { signal: controllerRef.current.signal });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const json = await res.json();
-      setData(json);
-    } catch (err: any) {
-      setError(err.message || "Request failed");
-      setData(null);
-    } finally {
-      setLoading(false);
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 400px;
+      max-width: 95%;
     }
-  }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background: #2d89ef;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1b5cb8;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 15px;
+      font-size: 14px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Sheikh Database Lookup</h2>
+    <input type="text" id="input" placeholder="Enter Mobile or CNIC">
+    <button onclick="lookup()">Search</button>
+    <pre id="result">Result will show here...</pre>
+  </div>
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-start p-8 font-sans">
-      <motion.h1 initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-3xl font-bold mb-4">
-        Safe API Demo
-      </motion.h1>
+  <script>
+    async function lookup() {
+      const num = document.getElementById("input").value.trim();
+      const resultBox = document.getElementById("result");
 
-      <form onSubmit={fetchData} className="flex flex-col gap-3 w-full max-w-md">
-        <label className="text-sm font-medium">Choose Endpoint</label>
-        <select value={endpoint} onChange={e => setEndpoint(e.target.value as EndpointKey)} className="border rounded p-2">
-          {ENDPOINTS.map(e => (
-            <option key={e.key} value={e.key}>{e.label}</option>
-          ))}
-        </select>
+      if (!num) {
+        alert("Please enter a number or CNIC!");
+        return;
+      }
 
-        <label className="text-sm font-medium">Enter ID (1–10)</label>
-        <input
-          value={id}
-          onChange={e => setId(e.target.value.replace(/[^0-9]/g, ""))}
-          className="border rounded p-2"
-          placeholder="e.g. 3"
-        />
+      resultBox.textContent = "Fetching data...";
 
-        <button type="submit" disabled={loading} className="bg-blue-600 text-white rounded p-2 hover:bg-blue-700">
-          {loading ? "Fetching…" : "Fetch Data"}
-        </button>
-      </form>
-
-      {error && <div className="mt-4 text-red-600">{error}</div>}
-
-      {data && (
-        <pre className="mt-4 text-sm bg-gray-100 rounded p-4 w-full max-w-md overflow-x-auto whitespace-pre-wrap">
-          {JSON.stringify(data, null, 2)}
-        </pre>
-      )}
-
-      <p className="text-xs text-gray-500 mt-8">
-        Demo uses JSONPlaceholder (public fake API). Safe for learning.
-      </p>
-    </div>
-  );
-}
+      try {
+        const token = "0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad"; //
+        const res = await fetch(`https://shadowdatabase.site/api.php?token=${0857f5fac8f154f2636937bc7ac8592bc9edea23c4ef1d55856e2cbeb854ddad}&num=${num}`);
+        const data = await res.json();
+        resultBox.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultBox.textContent = "Error fetching data!";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
